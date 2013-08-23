@@ -23,7 +23,6 @@ $faculty_books_metabox = array(
 					'id' 			=> 'ecpt_publisher',
 					'class' 		=> 'ecpt_publisher',
 					'type' 			=> 'text',
-					'max' 			=> 0,
 					'std'			=> ''													
 				),
 				array(
@@ -32,7 +31,6 @@ $faculty_books_metabox = array(
 					'id' 			=> 'ecpt_pub_date',
 					'class' 		=> 'ecpt_pub_date',
 					'type' 			=> 'text',
-					'max' 			=> 0,
 					'std'			=> ''													
 				),
 				array(
@@ -41,33 +39,29 @@ $faculty_books_metabox = array(
 					'id' 			=> 'ecpt_pub_link',
 					'class' 		=> 'ecpt_pub_link',
 					'type' 			=> 'text',
-					'max' 			=> 0,
 					'std'			=> ''													
 				),
-								
+				array(
+					'name' 			=> 'Role',
+					'desc' 			=> '',
+					'id' 			=> 'ecpt_pub_role',
+					'class' 		=> 'ecpt_pub_role',
+					'type' 			=> 'select2',
+					'options' => array('author','co-author','editor', 'contributor'),
+					'std'			=> ''
+				),				
 				array(
 					'name' 			=> 'Author',
 					'desc' 			=> '',
 					'id' 			=> 'ecpt_pub_author',
 					'class' 		=> 'ecpt_pub_author',
 					'type' 			=> 'select',
-					'max' 			=> 0,
 					'std'			=> ''
 				),				
-				array(
-					'name' 			=> 'Role',
-					'desc' 			=> '',
-					'id' 			=> 'ecpt_pub_role',
-					'class' 		=> 'ecpt_pub_role',
-					'type' 			=> 'radio',
-					'options' => array('author','co-author','editor', 'contributor'),
-					'max' 			=> 0,
-					'std'			=> 'author'
-				),				
-
-
 				
-));			
+));	
+
+		
 			
 add_action('admin_menu', 'ecpt_add_faculty_books_meta_box');
 function ecpt_add_faculty_books_meta_box() {
@@ -111,26 +105,21 @@ function ecpt_show_faculty_books_box()	{
 					'orderby' => 'meta_value',
 					'order' => 'ASC',
 					'posts_per_page' => '-1')); 
+				$authors = $author_select_query->get_posts();
 				echo '<select name="', $field['id'], '" id="', $field['id'], '">';
-				while ($author_select_query->have_posts()) : $author_select_query->the_post();
-					$option = $post->ID;
-					$selected = '';
-					if($option == $meta) {
-						$selected = 'selected="selected"';
-					}
-					echo '<option value="'. $post->ID .'"' . $selected .'>';
-						the_title();
-					echo '</option>';
-				endwhile;
-				echo '</select>', '', stripslashes($field['desc']);
+				foreach($authors as $author) {
+					echo '<option value="' . $author->ID . '"', $meta == $author->ID ? ' selected="selected"' : '', '>', $author->post_title, '</option>';
+		}
+				echo '</select>';
 				break;
-			case 'radio':
-				echo '<select name="', $field['id'], '" id="', $field['id'], '">';
+			case 'select2':
+			echo '<select name="', $field['id'], '" id="', $field['id'], '">';
 				foreach ($field['options'] as $option) {
+				
 					echo '<option value="' . $option . '"', $meta == $option ? ' selected="selected"' : '', '>', $option, '</option>';
 				}
-				echo '</select>', '', stripslashes($field['desc']);
-				break;
+				echo '</select>';
+			break;
 		}
 		echo     '<td>',
 			'</tr>';
@@ -184,6 +173,156 @@ function ecpt_faculty_books_save($post_id) {
 		}
 	}
 }
+$faculty_books_metabox2 = array( 
+	'id' => 'faculty_books2',
+	'title' => 'Second Author Details',
+	'page' => array('post'),
+	'context' => 'normal',
+	'priority' => 'medium',
+	'fields' => array(
+				array(
+					'name' 			=> 'Is there a second author?',
+					'desc' 			=> 'Tick checkbox if yes',
+					'id' 			=> 'ecpt_author_cond',
+					'class' 		=> 'ecpt_author_cond',
+					'type' 			=> 'checkbox',
+					'std'			=> ''													
+				),
+				array(
+					'name' 			=> 'Second Author Role',
+					'desc' 			=> '',
+					'id' 			=> 'ecpt_pub_role2',
+					'class' 		=> 'ecpt_pub_role2',
+					'type' 			=> 'select2',
+					'options' => array('author','co-author','editor', 'contributor'),
+					'std'			=> ''
+				),				
+				array(
+					'name' 			=> 'Second Author',
+					'desc' 			=> '',
+					'id' 			=> 'ecpt_pub_author2',
+					'class' 		=> 'ecpt_pub_author2',
+					'type' 			=> 'select',
+					'std'			=> ''
+				),				
+
+				
+));	
+add_action('admin_menu', 'ecpt_add_faculty_books_meta_box2');
+function ecpt_add_faculty_books_meta_box2() {
+
+	global $faculty_books_metabox2;		
+
+	foreach($faculty_books_metabox2['page'] as $page) {
+		add_meta_box($faculty_books_metabox2['id'], $faculty_books_metabox2['title'], 'ecpt_show_faculty_books_box2', $page, 'normal', 'default', $faculty_books_metabox2);
+	}
+}
+
+// function to show meta boxes
+function ecpt_show_faculty_books_box2()	{
+	global $post;
+	global $faculty_books_metabox2;
+	global $ecpt_prefix;
+	global $wp_version;
+	
+	// Use nonce for verification
+	echo '<input type="hidden" name="ecpt_faculty_books_meta_box2_nonce" value="', wp_create_nonce(basename(__FILE__)), '" />';
+	
+	echo '<table class="form-table">';
+
+	foreach ($faculty_books_metabox2['fields'] as $field) {
+		// get current post meta data
+
+		$meta = get_post_meta($post->ID, $field['id'], true);
+		
+		echo '<tr>',
+				'<th style="width:20%"><label for="', $field['id'], '">', $field['name'], '</label></th>',
+				'<td class="ecpt_field_type_' . str_replace(' ', '_', $field['type']) . '">';
+		switch ($field['type']) {
+			case 'text':
+				echo '<input type="text" name="', $field['id'], '" id="', $field['id'], '" value="', $meta ? $meta : $field['std'], '" size="30" style="width:97%" /><br/>', '', $field['desc'];
+				break;
+			case 'select' :
+				$author_select_query = new WP_Query(array(
+					'post-type' => 'people',
+					'role' => 'faculty',
+					'meta_key' => 'ecpt_people_alpha',
+					'orderby' => 'meta_value',
+					'order' => 'ASC',
+					'posts_per_page' => '-1')); 
+				$authors = $author_select_query ->get_posts();
+				echo '<select name="', $field['id'], '" id="', $field['id'], '">';
+				foreach($authors as $author) {
+					echo '<option value="' . $author->ID . '"', $meta == $author->ID ? ' selected="selected"' : '', '>', $author->post_title, '</option>';
+				}
+				echo '</select>';
+				break;
+			case 'select2':
+			echo '<select name="', $field['id'], '" id="', $field['id'], '">';
+				foreach ($field['options'] as $option) {
+				
+					echo '<option value="' . $option . '"', $meta == $option ? ' selected="selected"' : '', '>', $option, '</option>';
+				}
+				echo '</select>';
+			break;
+			case 'checkbox':
+				echo '<input type="checkbox" name="', $field['id'], '" id="', $field['id'], '"', $meta ? ' checked="checked"' : '', ' />&nbsp;';
+				echo $field['desc'];
+				break;
+		}
+		echo     '<td>',
+			'</tr>';
+	}
+	
+	echo '</table>';
+}	
+
+add_action('save_post', 'ecpt_faculty_books_save2');
+
+// Save data from meta box
+function ecpt_faculty_books_save2($post_id) {
+	global $post;
+	global $faculty_books_metabox2;
+	
+	// verify nonce
+	if (!isset($_POST['ecpt_faculty_books_meta_box2_nonce']) || !wp_verify_nonce($_POST['ecpt_faculty_books_meta_box2_nonce'], basename(__FILE__))) {
+		return $post_id;
+	}
+
+	// check autosave
+	if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) {
+		return $post_id;
+	}
+
+	// check permissions
+	if ('page' == $_POST['post_type']) {
+		if (!current_user_can('edit_page', $post_id)) {
+			return $post_id;
+		}
+	} elseif (!current_user_can('edit_post', $post_id)) {
+		return $post_id;
+	}
+	
+	foreach ($faculty_books_metabox2['fields'] as $field) {
+	
+		$old = get_post_meta($post_id, $field['id'], true);
+		$new = $_POST[$field['id']];
+		
+		if ($new && $new != $old) {
+			if($field['type'] == 'date') {
+				$new = ecpt_format_date($new);
+				update_post_meta($post_id, $field['id'], $new);
+			} else {
+				update_post_meta($post_id, $field['id'], $new);
+				
+				
+			}
+		} elseif ('' == $new && $old) {
+			delete_post_meta($post_id, $field['id'], $old);
+		}
+	}
+}
+
 function add_faculty_book_category() {
 		wp_insert_term('Faculty Books', 'category',  array('description'=> '','slug' => 'books'));
 	}
@@ -217,13 +356,17 @@ class Faculty_Books_Widget extends WP_Widget {
 					));
 		if ( $books_widget_query->have_posts() ) :  while ($books_widget_query->have_posts()) : $books_widget_query->the_post(); global $post;?>
 				<article class="row">
-				<?php $faculty_post_id = get_post_meta($post->ID, 'ecpt_pub_author', true); ?>
+				<?php $faculty_post_id = get_post_meta($post->ID, 'ecpt_pub_author', true);
+					  $faculty_post_id2 = get_post_meta($post->ID, 'ecpt_pub_author2', true); ?>
 						<a href="<?php the_permalink(); ?>">
 							<?php if ( has_post_thumbnail()) { ?> 
 								<?php the_post_thumbnail('thumbnail'); ?>
 							<?php } ?>
 							<h6><?php the_title(); ?></h6>
-							<p><b>Author: <?php echo get_the_title($faculty_post_id); ?></b><br>
+							<p><b><?php echo get_the_title($faculty_post_id); ?>,&nbsp;<?php echo get_post_meta($post->ID, 'ecpt_pub_role', true); ?>
+							<?php if (get_post_meta($post->ID, 'ecpt_author_cond', true) == 'on') { ?><br>
+								<?php echo get_the_title($faculty_post_id2); ?> ,&nbsp;<?php echo get_post_meta($post->ID, 'ecpt_pub_role2', true); }?>
+							</b></p>
 						</a>
 				</article>
 		<?php endwhile; endif;  echo $after_widget;
