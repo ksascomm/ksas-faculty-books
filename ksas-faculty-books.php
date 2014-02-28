@@ -47,7 +47,7 @@ $faculty_books_metabox = array(
 					'id' 			=> 'ecpt_pub_role',
 					'class' 		=> 'ecpt_pub_role',
 					'type' 			=> 'select2',
-					'options' => array('author','co-author','editor', 'contributor'),
+					'options' => array('author','co-author','editor', 'contributor', 'translator'),
 					'std'			=> ''
 				),				
 				array(
@@ -194,7 +194,7 @@ $faculty_books_metabox2 = array(
 					'id' 			=> 'ecpt_pub_role2',
 					'class' 		=> 'ecpt_pub_role2',
 					'type' 			=> 'select2',
-					'options' => array('author','co-author','editor', 'contributor'),
+					'options' => array('author','co-author','editor', 'contributor', 'translator'),
 					'std'			=> ''
 				),				
 				array(
