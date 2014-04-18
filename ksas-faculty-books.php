@@ -99,8 +99,20 @@ function ecpt_show_faculty_books_box()	{
 				break;
 			case 'select' :
 				$author_select_query = new WP_Query(array(
-					'post-type' => 'people',
-					'role' => 'faculty',
+					'post_type' => 'people',
+					'tax_query' => array(
+						'relation' => 'OR',
+						array(
+							'taxonomy' => 'role',
+							'field' => 'slug',
+							'terms' => array('adjunct-faculty'),
+						),
+						array(
+							'taxonomy' => 'role',
+							'field' => 'slug',
+							'terms' => array('faculty'),
+						)
+					),
 					'meta_key' => 'ecpt_people_alpha',
 					'orderby' => 'meta_value',
 					'order' => 'ASC',
@@ -244,8 +256,20 @@ function ecpt_show_faculty_books_box2()	{
 				break;
 			case 'select' :
 				$author_select_query = new WP_Query(array(
-					'post-type' => 'people',
-					'role' => 'faculty',
+					'post_type' => 'people',
+					'tax_query' => array(
+						'relation' => 'OR',
+						array(
+							'taxonomy' => 'role',
+							'field' => 'slug',
+							'terms' => array('adjunct-faculty'),
+						),
+						array(
+							'taxonomy' => 'role',
+							'field' => 'slug',
+							'terms' => array('faculty'),
+						)
+					),
 					'meta_key' => 'ecpt_people_alpha',
 					'orderby' => 'meta_value',
 					'order' => 'ASC',
