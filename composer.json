@@ -2,7 +2,7 @@
   "name": "ksascomm/ksas-faculty-books",
   "type": "wordpress-plugin",
   "license": "GPL2",
-  "description": " Widgets for SE Calendar, Stories from the Hub (widget, template tag, and shortcode), Custom RSS, News from another site, search form shortcode",
+  "description": "Creates the metabox for faculty books details.",
   "homepage": "http://github.com/ksascomm/plugin_faculty_books",
   "authors": [
       {
