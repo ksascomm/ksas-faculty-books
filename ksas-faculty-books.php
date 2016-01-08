@@ -47,7 +47,7 @@ $faculty_books_metabox = array(
 					'id' 			=> 'ecpt_pub_role',
 					'class' 		=> 'ecpt_pub_role',
 					'type' 			=> 'select2',
-					'options' => array('author','co-author','editor', 'contributor', 'translator'),
+					'options' => array('author','co-author','editor', 'co-editor', 'contributor', 'translator'),
 					'std'			=> ''
 				),				
 				array(
@@ -110,7 +110,7 @@ function ecpt_show_faculty_books_box()	{
 						array(
 							'taxonomy' => 'role',
 							'field' => 'slug',
-							'terms' => array('faculty'),
+							'terms' => array('faculty', 'aa-faculty', 'ae-visiting'),
 						)
 					),
 					'meta_key' => 'ecpt_people_alpha',
@@ -206,7 +206,7 @@ $faculty_books_metabox2 = array(
 					'id' 			=> 'ecpt_pub_role2',
 					'class' 		=> 'ecpt_pub_role2',
 					'type' 			=> 'select2',
-					'options' => array('author','co-author','editor', 'contributor', 'translator'),
+					'options' => array('author','co-author','editor', 'co-editor', 'contributor', 'translator'),
 					'std'			=> ''
 				),				
 				array(
@@ -267,7 +267,7 @@ function ecpt_show_faculty_books_box2()	{
 						array(
 							'taxonomy' => 'role',
 							'field' => 'slug',
-							'terms' => array('faculty'),
+							'terms' => array('faculty', 'aa-faculty','ae-visiting'),
 						)
 					),
 					'meta_key' => 'ecpt_people_alpha',
@@ -276,6 +276,7 @@ function ecpt_show_faculty_books_box2()	{
 					'posts_per_page' => '-1')); 
 				$authors = $author_select_query ->get_posts();
 				echo '<select name="', $field['id'], '" id="', $field['id'], '">';
+				echo '<option name="no-author" value="no-author" selected="selected"></option>';
 				foreach($authors as $author) {
 					echo '<option value="' . $author->ID . '"', $meta == $author->ID ? ' selected="selected"' : '', '>', $author->post_title, '</option>';
 				}
@@ -379,7 +380,7 @@ class Faculty_Books_Widget extends WP_Widget {
 	function Faculty_Books_Widget() {
 		$widget_options = array( 'classname' => 'ksas_books', 'description' => __('Displays faculty books at random', 'ksas_books') );
 		$control_options = array( 'width' => 300, 'height' => 350, 'id_base' => 'ksas_books-widget' );
-		$this->WP_Widget( 'ksas_books-widget', __('Faculty Books', 'ksas_books'), $widget_options, $control_options );
+		parent::__construct( 'ksas_books-widget', __('Faculty Books', 'ksas_books'), $widget_options, $control_options );
 	}
 
 	/* Widget Display */
