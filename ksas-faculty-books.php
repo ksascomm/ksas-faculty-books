@@ -415,19 +415,22 @@ class Faculty_Books_Widget extends WP_Widget {
 						));
 		}
 		if ( $books_widget_query->have_posts() ) :  while ($books_widget_query->have_posts()) : $books_widget_query->the_post(); global $post;?>
-				<article class="row">
+				<article class="row" aria-labelledby="book-<?php the_ID(); ?>">
+					<div class="small-12 columns">			
 				<?php $faculty_post_id = get_post_meta($post->ID, 'ecpt_pub_author', true);
 					  $faculty_post_id2 = get_post_meta($post->ID, 'ecpt_pub_author2', true); ?>
-						<a href="<?php the_permalink(); ?>">
 							<?php if ( has_post_thumbnail()) { ?> 
 								<?php the_post_thumbnail('directory'); ?>
 							<?php } ?>
-							<h6><?php the_title(); ?></h6>
-							<p><b><?php echo get_the_title($faculty_post_id); ?>,&nbsp;<?php echo get_post_meta($post->ID, 'ecpt_pub_role', true); ?>
+							<h5>
+								<a href="<?php the_permalink(); ?>" id="book-<?php the_ID(); ?>"><?php the_title(); ?></a>
+							</h5>
+							<p>
+							<strong><?php echo get_the_title($faculty_post_id); ?>,&nbsp;<?php echo get_post_meta($post->ID, 'ecpt_pub_role', true); ?>
 							<?php if (get_post_meta($post->ID, 'ecpt_author_cond', true) == 'on') { ?><br>
 								<?php echo get_the_title($faculty_post_id2); ?> ,&nbsp;<?php echo get_post_meta($post->ID, 'ecpt_pub_role2', true); }?>
-							</b></p>
-						</a>
+							</strong></p>
+					</div>
 				</article>
 		<?php endwhile; endif;  echo $after_widget;
 	}
