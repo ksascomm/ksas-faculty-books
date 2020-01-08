@@ -377,14 +377,14 @@ $terms = array(
 
 /*************Faculty Books Widget*****************/
 class Faculty_Books_Widget extends WP_Widget {
-	function Faculty_Books_Widget() {
+	public function __construct() {
 		$widget_options = array( 'classname' => 'ksas_books', 'description' => __('Displays faculty books at random', 'ksas_books') );
 		$control_options = array( 'width' => 300, 'height' => 350, 'id_base' => 'ksas_books-widget' );
 		parent::__construct( 'ksas_books-widget', __('Faculty Books', 'ksas_books'), $widget_options, $control_options );
 	}
 
 	/* Widget Display */
-	function widget( $args, $instance ) {
+	public function widget( $args, $instance ) {
 		extract( $args );
 
 		/* Our variables from the widget settings. */
@@ -436,7 +436,7 @@ class Faculty_Books_Widget extends WP_Widget {
 	}
 
 	/* Update/Save the widget settings. */
-	function update( $new_instance, $old_instance ) {
+	public function update( $new_instance, $old_instance ) {
 		$instance = $old_instance;
 
 		/* Strip tags for title and name to remove HTML (important for text inputs). */
@@ -449,7 +449,7 @@ class Faculty_Books_Widget extends WP_Widget {
 	}
 
 	/* Widget Options */
-	function form( $instance ) {
+	public function form( $instance ) {
 
 		/* Set up some default widget settings. */
 		$defaults = array( 'title' => __('Faculty Books', 'ksas_books'), 'quantity' => __('3', 'ksas_books'), 'program' => __('', 'ksas_books'));
