@@ -419,9 +419,7 @@ class Faculty_Books_Widget extends WP_Widget {
 					<div class="small-12 columns small-12 cell">
 				<?php $faculty_post_id = get_post_meta($post->ID, 'ecpt_pub_author', true);
 					  $faculty_post_id2 = get_post_meta($post->ID, 'ecpt_pub_author2', true); ?>
-							<?php if ( has_post_thumbnail()) { ?>
-								<?php the_post_thumbnail('directory'); ?>
-							<?php } ?>
+							<?php if ( has_post_thumbnail()) {  the_post_thumbnail('directory', array('alt' => esc_html ( get_the_title() )) );  } ?>
 							<h5>
 								<a href="<?php the_permalink(); ?>" id="book-<?php the_ID(); ?>"><?php the_title(); ?><span class="link"></span></a>
 							</h5>
