@@ -415,8 +415,8 @@ class Faculty_Books_Widget extends WP_Widget {
 						));
 		}
 		if ( $books_widget_query->have_posts() ) :  while ($books_widget_query->have_posts()) : $books_widget_query->the_post(); global $post;?>
-				<article class="row grid-x" aria-labelledby="book-<?php the_ID(); ?>">
-					<div class="small-12 columns small-12 cell">
+				<article class="grid-x" aria-labelledby="book-<?php the_ID(); ?>">
+					<div class="cell">
 				<?php $faculty_post_id = get_post_meta($post->ID, 'ecpt_pub_author', true);
 					  $faculty_post_id2 = get_post_meta($post->ID, 'ecpt_pub_author2', true); ?>
 							<?php if ( has_post_thumbnail()) {  the_post_thumbnail('directory', array('alt' => esc_html ( get_the_title() )) );  } ?>
