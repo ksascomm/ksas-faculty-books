@@ -1,18 +1,89 @@
 <?php
 /**
- * Plugin Name: KSAS Faculty Books Metabox for Posts
+ * Plugin Name: KSAS Faculty Books
  * Plugin URI: http://krieger.jhu.edu/
- * Description: Creates the metabox for faculty books details.
- * Version: 2.0
+ * Description: Creates faculty books custom post type.
+ * Version: 3.0
  * Author: KSAS Communications
  * Author URI: mailto:ksaswen@jhu.edu
  * License: GPL2
  */
 
+/**
+ * Creating a function to create our CPT
+ */
+function faculty_books_custom_post_type() {
+
+	// Set UI labels for this Custom Post Type.
+		$labels = array(
+			'name'               => _x( 'Faculty Books', 'Post Type General Name' ),
+			'singular_name'      => _x( 'Faculty Book', 'Post Type Singular Name' ),
+			'menu_name'          => __( 'Faculty Books' ),
+			'parent_item_colon'  => __( 'Parent Faculty Book' ),
+			'all_items'          => __( 'All Faculty Books' ),
+			'view_item'          => __( 'View Faculty Book' ),
+			'add_new_item'       => __( 'Add New Faculty Book' ),
+			'add_new'            => __( 'Add New' ),
+			'edit_item'          => __( 'Edit Faculty Book' ),
+			'update_item'        => __( 'Update Faculty Book' ),
+			'search_items'       => __( 'Search Faculty Book' ),
+			'not_found'          => __( 'Not Found' ),
+			'not_found_in_trash' => __( 'Not found in Trash' ),
+		);
+
+		// Set other options for this Custom Post Type.
+
+		$args = array(
+			'label'               => __( 'Faculty Books' ),
+			'description'         => __( 'Published works by Faculty' ),
+			'labels'              => $labels,
+			// Features this CPT supports in Post Editor.
+			'supports'            => array( 'title', 'editor', 'thumbnail', 'revisions' ),
+			// You can associate this CPT with a taxonomy or custom taxonomy.
+			'taxonomies'          => array( 'books' ),
+
+			/*
+			A hierarchical CPT is like Pages and can have
+			* Parent and child items. A non-hierarchical CPT
+			* is like Posts.
+			*/
+			'hierarchical'        => false,
+			'public'              => true,
+			'show_ui'             => true,
+			'show_in_menu'        => true,
+			'show_in_nav_menus'   => true,
+			'show_in_admin_bar'   => true,
+			'menu_position'       => 5,
+			'menu_icon'           => 'dashicons-book-alt',
+			'can_export'          => true,
+			'has_archive'         => true,
+			'exclude_from_search' => false,
+			'publicly_queryable'  => true,
+			'capability_type'     => 'post',
+			'show_in_rest'        => true,
+
+		);
+
+		// Register this Custom Post Type.
+		register_post_type( 'faculty-books', $args );
+}
+
+	/*
+	Hook into the 'init' action so that the function
+	* Containing this post type registration is not
+	* unnecessarily executed.
+	*/
+
+	add_action( 'init', 'faculty_books_custom_post_type', 0 );
+
+
+/**
+ * Meta Boxes
+ */
 $faculty_books_metabox = array(
 	'id'       => 'faculty_books',
 	'title'    => 'Faculty Books Details',
-	'page'     => array( 'post' ),
+	'page'     => array( 'faculty-books' ),
 	'context'  => 'normal',
 	'priority' => 'high',
 	'fields'   => array(
@@ -191,7 +262,7 @@ function ecpt_faculty_books_save( $post_id ) {
 $faculty_books_metabox2 = array(
 	'id'       => 'faculty_books2',
 	'title'    => 'Second Author Details',
-	'page'     => array( 'post' ),
+	'page'     => array( 'faculty-books' ),
 	'context'  => 'normal',
 	'priority' => 'medium',
 	'fields'   => array(
@@ -356,37 +427,6 @@ function ecpt_faculty_books_save2( $post_id ) {
 	}
 }
 
-/** Check Category Terms */
-function check_category_terms() {
-
-	// See if we already have populated any terms.
-	$term = get_terms( 'category', array( 'hide_empty' => false ) );
-
-	// if no terms then lets add our terms.
-	if ( empty( $term ) ) {
-		$terms = define_category_terms();
-		foreach ( $terms as $term ) {
-			if ( ! term_exists( $term['name'], 'category' ) ) {
-				wp_insert_term( $term['name'], 'category', array( 'slug' => $term['slug'] ) );
-			}
-		}
-	}
-}
-
-add_action( 'init', 'check_category_terms' );
-
-function define_category_terms() {
-
-	$terms = array(
-		'0' => array(
-			'name' => 'Faculty Books',
-			'slug' => 'books',
-		),
-	);
-
-	return $terms;
-}
-
 /*************Faculty Books Widget */
 add_action( 'widgets_init', 'ksas_load_faculty_books_widget' );
 
@@ -428,7 +468,7 @@ class Faculty_Books_Widget extends WP_Widget {
 		if ( taxonomy_exists( 'program' ) ) {
 			$books_widget_query = new WP_Query(
 				array(
-					'post_type'      => 'post',
+					'post_type'      => 'faculty-books',
 					'category_name'  => 'books',
 					'program'        => $program,
 					'posts_per_page' => $quantity,
@@ -438,7 +478,7 @@ class Faculty_Books_Widget extends WP_Widget {
 		} else {
 			$books_widget_query = new WP_Query(
 				array(
-					'post_type'      => 'post',
+					'post_type'      => 'faculty-books',
 					'category_name'  => 'books',
 					'posts_per_page' => $quantity,
 					'orderby'        => 'rand',
@@ -463,12 +503,16 @@ class Faculty_Books_Widget extends WP_Widget {
 						<a href="<?php the_permalink(); ?>" id="book-<?php the_ID(); ?>"><?php the_title(); ?><span class="link"></span></a>
 					</h5>
 					<p>
-					<strong><?php echo get_the_title( $faculty_post_id ); ?>,&nbsp;<?php echo get_post_meta( $post->ID, 'ecpt_pub_role', true ); ?>
-								<?php
-								if ( get_post_meta( $post->ID, 'ecpt_author_cond', true ) == 'on' ) {
-									?>
-									<br>
-						<?php echo get_the_title( $faculty_post_id2 ); ?> ,&nbsp;<?php echo get_post_meta( $post->ID, 'ecpt_pub_role2', true ); } ?>
+					<strong><?php echo esc_html( get_the_title( $faculty_post_id ) ); ?>,&nbsp;<?php echo esc_html( get_post_meta( $post->ID, 'ecpt_pub_role', true ) ); ?>
+						<?php
+						if ( get_post_meta( $post->ID, 'ecpt_author_cond', true ) == 'on' ) {
+							?>
+							<br>
+							<?php echo esc_html( get_the_title( $faculty_post_id2 ) ); ?> ,&nbsp;
+									<?php
+										echo esc_html( get_post_meta( $post->ID, 'ecpt_pub_role2', true ) );
+						}
+						?>
 					</strong></p>
 					</div>
 				</article>
@@ -485,9 +529,6 @@ class Faculty_Books_Widget extends WP_Widget {
 		/* Strip tags for title and name to remove HTML (important for text inputs). */
 		$instance['title']    = wp_strip_all_tags( $new_instance['title'] );
 		$instance['quantity'] = wp_strip_all_tags( $new_instance['quantity'] );
-		if ( taxonomy_exists( 'program' ) ) {
-			$instance['program'] = wp_strip_all_tags( $new_instance['program'] );
-		}
 		return $instance;
 	}
 
@@ -498,52 +539,22 @@ class Faculty_Books_Widget extends WP_Widget {
 		$defaults = array(
 			'title'    => __( 'Faculty Books', 'ksas_books' ),
 			'quantity' => __( '3', 'ksas_books' ),
-			'program'  => __( '', 'ksas_books' ),
 		);
 		$instance = wp_parse_args( (array) $instance, $defaults );
 		?>
 
 		<!-- Widget Title: Text Input -->
 		<p>
-			<label for="<?php echo $this->get_field_id( 'title' ); ?>"><?php _e( 'Title:', 'hybrid' ); ?></label>
-			<input id="<?php echo $this->get_field_id( 'title' ); ?>" name="<?php echo $this->get_field_name( 'title' ); ?>" value="<?php echo $instance['title']; ?>" style="width:100%;" />
+			<label for="<?php echo esc_html( $this->get_field_id( 'title' ) ); ?>"><?php esc_html_e( 'Title:', 'hybrid' ); ?></label>
+			<input id="<?php echo esc_html( $this->get_field_id( 'title' ) ); ?>" name="<?php echo esc_html( $this->get_field_name( 'title' ) ); ?>" value="<?php echo esc_html( $instance['title'] ); ?>" style="width:100%;" />
 		</p>
 
 		<!-- Number of Stories: Text Input -->
 		<p>
-			<label for="<?php echo $this->get_field_id( 'quantity' ); ?>"><?php _e( 'Number of stories to display:', 'ksas_books' ); ?></label>
-			<input id="<?php echo $this->get_field_id( 'quantity' ); ?>" name="<?php echo $this->get_field_name( 'quantity' ); ?>" value="<?php echo $instance['quantity']; ?>" style="width:100%;" />
+			<label for="<?php echo esc_html( $this->get_field_id( 'quantity' ) ); ?>"><?php esc_html_e( 'Number of stories to display:', 'ksas_books' ); ?></label>
+			<input id="<?php echo esc_html( $this->get_field_id( 'quantity' ) ); ?>" name="<?php echo esc_html( $this->get_field_name( 'quantity' ) ); ?>" value="<?php echo esc_html( $instance['quantity'] ); ?>" style="width:100%;" />
 		</p>
-		<!-- Choose Profile Type: Select Box -->
-		<?php if ( taxonomy_exists( 'program' ) ) { ?>
-		<p>
-			<label for="<?php echo $this->get_field_id( 'program' ); ?>"><?php _e( 'Choose Program:', 'ksas_books' ); ?></label>
-			<select id="<?php echo $this->get_field_id( 'program' ); ?>" name="<?php echo $this->get_field_name( 'program' ); ?>" class="widefat" style="width:100%;">
-			<?php
-			global $wpdb;
-				$categories = get_categories(
-					array(
-						'orderby'    => 'name',
-						'order'      => 'ASC',
-						'hide_empty' => 1,
-						'taxonomy'   => 'program',
-					)
-				);
-			foreach ( $categories as $category ) {
-				$category_choice = $category->slug;
-				$category_title  = $category->name;
-				?>
-			<option value="<?php echo $category_choice; ?>"
-				<?php
-				if ( $category_choice == $instance['category_choice'] ) {
-					echo 'selected="selected"';}
-				?>
-				><?php echo $category_title; ?></option>
-			<?php } ?>
-			</select>
-		</p>
-
-	<?php }
+		<?php
 	}
 }
 
