@@ -98,7 +98,7 @@ $faculty_books_metabox = array(
 		),
 		array(
 			'name'  => 'Publication Date',
-			'desc'  => '',
+			'desc'  => 'Year Only',
 			'id'    => 'ecpt_pub_date',
 			'class' => 'ecpt_pub_date',
 			'type'  => 'text',
@@ -529,6 +529,9 @@ class Faculty_Books_Widget extends WP_Widget {
 		/* Strip tags for title and name to remove HTML (important for text inputs). */
 		$instance['title']    = wp_strip_all_tags( $new_instance['title'] );
 		$instance['quantity'] = wp_strip_all_tags( $new_instance['quantity'] );
+		if ( taxonomy_exists( 'program' ) ) {
+			$instance['program'] = wp_strip_all_tags( $new_instance['program'] );
+		}
 		return $instance;
 	}
 
@@ -539,6 +542,7 @@ class Faculty_Books_Widget extends WP_Widget {
 		$defaults = array(
 			'title'    => __( 'Faculty Books', 'ksas_books' ),
 			'quantity' => __( '3', 'ksas_books' ),
+			'program'  => __( '', 'ksas_books' ),
 		);
 		$instance = wp_parse_args( (array) $instance, $defaults );
 		?>
@@ -554,7 +558,34 @@ class Faculty_Books_Widget extends WP_Widget {
 			<label for="<?php echo esc_html( $this->get_field_id( 'quantity' ) ); ?>"><?php esc_html_e( 'Number of stories to display:', 'ksas_books' ); ?></label>
 			<input id="<?php echo esc_html( $this->get_field_id( 'quantity' ) ); ?>" name="<?php echo esc_html( $this->get_field_name( 'quantity' ) ); ?>" value="<?php echo esc_html( $instance['quantity'] ); ?>" style="width:100%;" />
 		</p>
-		<?php
+		<?php if ( taxonomy_exists( 'program' ) ) { ?>
+		<p>
+			<label for="<?php echo $this->get_field_id( 'program' ); ?>"><?php _e( 'Choose Program:', 'ksas_books' ); ?></label>
+			<select id="<?php echo $this->get_field_id( 'program' ); ?>" name="<?php echo $this->get_field_name( 'program' ); ?>" class="widefat" style="width:100%;">
+			<?php
+			global $wpdb;
+				$categories = get_categories(
+					array(
+						'orderby'    => 'name',
+						'order'      => 'ASC',
+						'hide_empty' => 1,
+						'taxonomy'   => 'program',
+					)
+				);
+			foreach ( $categories as $category ) {
+				$category_choice = $category->slug;
+				$category_title  = $category->name;
+				?>
+			<option value="<?php echo $category_choice; ?>"
+				<?php
+				if ( $category_choice == $instance['category_choice'] ) {
+					echo 'selected="selected"';}
+				?>
+				><?php echo $category_title; ?></option>
+			<?php } ?>
+			</select>
+		</p>
+		<?php }
 	}
 }
 
