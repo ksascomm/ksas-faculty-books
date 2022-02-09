@@ -469,7 +469,6 @@ class Faculty_Books_Widget extends WP_Widget {
 			$books_widget_query = new WP_Query(
 				array(
 					'post_type'      => 'faculty-books',
-					'category_name'  => 'books',
 					'program'        => $program,
 					'posts_per_page' => $quantity,
 					'orderby'        => 'rand',
@@ -479,7 +478,6 @@ class Faculty_Books_Widget extends WP_Widget {
 			$books_widget_query = new WP_Query(
 				array(
 					'post_type'      => 'faculty-books',
-					'category_name'  => 'books',
 					'posts_per_page' => $quantity,
 					'orderby'        => 'rand',
 				)
