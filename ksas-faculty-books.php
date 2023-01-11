@@ -40,7 +40,7 @@ function faculty_books_custom_post_type() {
 			// Features this CPT supports in Post Editor.
 			'supports'            => array( 'title', 'editor', 'thumbnail', 'revisions' ),
 			// You can associate this CPT with a taxonomy or custom taxonomy.
-			//'taxonomies'          => array( 'books' ),
+			'taxonomies'          => array( 'books' ),
 
 			/*
 			A hierarchical CPT is like Pages and can have
