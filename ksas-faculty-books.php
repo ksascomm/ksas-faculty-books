@@ -483,8 +483,9 @@ class Faculty_Books_Widget extends WP_Widget {
 				)
 			);
 		}
-		if ( $books_widget_query->have_posts() ) :
-			while ( $books_widget_query->have_posts() ) :
+		if ( $books_widget_query->have_posts() ) : ?>
+		<div class="book-listings">
+			<?php while ( $books_widget_query->have_posts() ) :
 				$books_widget_query->the_post();
 				global $post;?>
 				<article class="grid-x" aria-labelledby="book-<?php the_ID(); ?>">
@@ -515,8 +516,9 @@ class Faculty_Books_Widget extends WP_Widget {
 					</div>
 				</article>
 				<?php
-		endwhile;
-		endif;
+		endwhile;?>
+		</div>
+		<?php endif;
 		echo $args['after_widget'];
 	}
 
