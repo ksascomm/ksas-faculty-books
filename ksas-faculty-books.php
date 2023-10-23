@@ -105,8 +105,8 @@ $faculty_books_metabox = array(
 			'std'   => '',
 		),
 		array(
-			'name'  => 'Purchase (Amazon) Link',
-			'desc'  => '(Do NOT include http://)',
+			'name'  => 'Purchase Link (Amazon, Publisher, etc)',
+			'desc'  => '',
 			'id'    => 'ecpt_pub_link',
 			'class' => 'ecpt_pub_link',
 			'type'  => 'text',
