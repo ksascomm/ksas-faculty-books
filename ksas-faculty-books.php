@@ -605,7 +605,7 @@ class Faculty_Books_Widget extends WP_Widget {
 				?>
 					<?php
 					if ( has_post_thumbnail() ) {
-						the_post_thumbnail( 'directory', array( 'alt' => esc_html( get_the_title() ) ) );  }
+						the_post_thumbnail( 'full', array( 'alt' => esc_html( get_the_title() ) ) );  }
 					?>
 					<h5>
 						<a href="<?php the_permalink(); ?>" id="book-<?php the_ID(); ?>"><?php the_title(); ?><span class="link"></span></a>
