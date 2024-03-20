@@ -3,7 +3,7 @@
  * Plugin Name: KSAS Faculty Books
  * Plugin URI: http://krieger.jhu.edu/
  * Description: Creates faculty books custom post type.
- * Version: 3.0
+ * Version: 3.1
  * Author: KSAS Communications
  * Author URI: mailto:ksaswen@jhu.edu
  * License: GPL2
@@ -105,8 +105,8 @@ $faculty_books_metabox = array(
 			'std'   => '',
 		),
 		array(
-			'name'  => 'Purchase Link (Amazon, Publisher, etc)',
-			'desc'  => '',
+			'name'  => 'Purchase (Amazon) Link',
+			'desc'  => '(Do NOT include http://)',
 			'id'    => 'ecpt_pub_link',
 			'class' => 'ecpt_pub_link',
 			'type'  => 'text',
@@ -427,21 +427,16 @@ function ecpt_faculty_books_save2( $post_id ) {
 	}
 }
 
-/*************Faculty Books Widget */
-add_action( 'widgets_init', 'ksas_load_faculty_books_widget' );
-
-/** Register Widget */
-function ksas_load_faculty_books_widget() {
-	register_widget( 'Faculty_Books_Widget' );
-}
-
-/** Set up the widget in the WP Admin area so that it has it's own unique identifier and a title and description. */
+/*************Faculty Books Widget*****************/
+	/**
+	 * Register widget with WordPress.
+	 */
 class Faculty_Books_Widget extends WP_Widget {
 	/** The first parameter passed to parent::__construct() is a string representing the id of this widget */
 	public function __construct() {
 		$widget_options  = array(
 			'classname'   => 'ksas_books',
-			'description' => __( 'Displays faculty books at random', 'ksas_books' ),
+			'description' => __( 'Displays faculty books at random or by date', 'ksas_books' ),
 		);
 		$control_options = array(
 			'width'   => 300,
@@ -451,95 +446,36 @@ class Faculty_Books_Widget extends WP_Widget {
 		parent::__construct( 'ksas_books-widget', __( 'Faculty Books', 'ksas_books' ), $widget_options, $control_options );
 	}
 
-	/** Widget Display */
-	public function widget( $args, $instance ) {
-		/* Our variables from the widget settings. */
-		$title    = apply_filters( 'widget_title', $instance['title'] );
-		$quantity = $instance['quantity'];
-		if ( taxonomy_exists( 'program' ) ) {
-			$program = $instance['program'];
-		}
-		echo $args['before_widget'];
-
-		/* Display the widget title if one was input (before and after defined by themes). */
-		if ( $title ) {
-			echo $args['before_title'] . $title . $args['after_title'];
-		}
-		if ( taxonomy_exists( 'program' ) ) {
-			$books_widget_query = new WP_Query(
-				array(
-					'post_type'      => 'faculty-books',
-					'program'        => $program,
-					'posts_per_page' => $quantity,
-					'orderby'        => 'rand',
-				)
-			);
-		} else {
-			$books_widget_query = new WP_Query(
-				array(
-					'post_type'      => 'faculty-books',
-					'posts_per_page' => $quantity,
-					'orderby'        => 'rand',
-				)
-			);
-		}
-		if ( $books_widget_query->have_posts() ) : ?>
-		<div class="book-listings">
-			<?php
-			while ( $books_widget_query->have_posts() ) :
-				$books_widget_query->the_post();
-				global $post;
-				?>
-				<article class="grid-x" aria-labelledby="book-<?php the_ID(); ?>">
-					<div class="cell">
-				<?php
-				$faculty_post_id  = get_post_meta( $post->ID, 'ecpt_pub_author', true );
-				$faculty_post_id2 = get_post_meta( $post->ID, 'ecpt_pub_author2', true );
-				?>
-					<?php
-					if ( has_post_thumbnail() ) {
-						the_post_thumbnail( 'large', array( 'alt' => esc_html( get_the_title() ) ) );  }
-					?>
-					<h5>
-						<a href="<?php the_permalink(); ?>" id="book-<?php the_ID(); ?>"><?php the_title(); ?><span class="link"></span></a>
-					</h5>
-					<p>
-					<strong><?php echo esc_html( get_the_title( $faculty_post_id ) ); ?>,&nbsp;<?php echo esc_html( get_post_meta( $post->ID, 'ecpt_pub_role', true ) ); ?>
-						<?php
-						if ( get_post_meta( $post->ID, 'ecpt_author_cond', true ) == 'on' ) {
-							?>
-							<br>
-							<?php echo esc_html( get_the_title( $faculty_post_id2 ) ); ?> ,&nbsp;
-									<?php
-										echo esc_html( get_post_meta( $post->ID, 'ecpt_pub_role2', true ) );
-						}
-						?>
-					</strong></p>
-					</div>
-				</article>
-				<?php
-		endwhile;
-			?>
-		</div>
-			<?php
-		endif;
-		echo $args['after_widget'];
-	}
-
-	/** Update/Save the widget settings. */
+	/**
+	 * Sanitize widget form values as they are saved.
+	 *
+	 * @see WP_Widget::update()
+	 *
+	 * @param array $new_instance Values just sent to be saved.
+	 * @param array $old_instance Previously saved values from database.
+	 *
+	 * @return array Updated safe values to be saved.
+	 */
 	public function update( $new_instance, $old_instance ) {
 		$instance = array();
 
 		/* Strip tags for title and name to remove HTML (important for text inputs). */
-		$instance['title']    = wp_strip_all_tags( $new_instance['title'] );
-		$instance['quantity'] = wp_strip_all_tags( $new_instance['quantity'] );
+		$instance['title']    = isset( $new_instance['title'] ) ? wp_strip_all_tags( $new_instance['title'] ) : '';
+		$instance['random']   = isset( $new_instance['random'] ) ? wp_strip_all_tags( $new_instance['random'] ) : '';
+		$instance['quantity'] = isset( $new_instance['quantity'] ) ? wp_strip_all_tags( $new_instance['quantity'] ) : '';
 		if ( taxonomy_exists( 'program' ) ) {
 			$instance['program'] = wp_strip_all_tags( $new_instance['program'] );
 		}
 		return $instance;
 	}
 
-	/** Widget Options */
+	/**
+	 * Back-end widget form.
+	 *
+	 * @see WP_Widget::form()
+	 *
+	 * @param array $instance Previously saved values from database.
+	 */
 	public function form( $instance ) {
 
 		/* Set up some default widget settings. */
@@ -547,6 +483,7 @@ class Faculty_Books_Widget extends WP_Widget {
 			'title'    => __( 'Faculty Books', 'ksas_books' ),
 			'quantity' => __( '3', 'ksas_books' ),
 			'program'  => __( '', 'ksas_books' ),
+			'random'   => 'rand',
 		);
 		$instance = wp_parse_args( (array) $instance, $defaults );
 		?>
@@ -555,6 +492,25 @@ class Faculty_Books_Widget extends WP_Widget {
 		<p>
 			<label for="<?php echo esc_html( $this->get_field_id( 'title' ) ); ?>"><?php esc_html_e( 'Title:', 'hybrid' ); ?></label>
 			<input id="<?php echo esc_html( $this->get_field_id( 'title' ) ); ?>" name="<?php echo esc_html( $this->get_field_name( 'title' ) ); ?>" value="<?php echo esc_html( $instance['title'] ); ?>" style="width:100%;" />
+		</p>
+
+		<!-- Order: Latest or Random -->
+		<p>
+			<label for="<?php echo esc_attr( $this->get_field_id( 'random' ) ); ?>"><?php esc_html_e( 'Order (Latest or Random)', 'ksas_books' ); ?></label>
+			<select id="<?php echo esc_attr( $this->get_field_id( 'random' ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'random' ) ); ?>" class="widefat" style="width:100%;">
+			<option value="date" 
+			<?php
+			if ( 'date' === $instance['random'] ) {
+				echo 'selected="selected"';}
+			?>
+			>Latest Only</option>
+			<option value="rand" 
+			<?php
+			if ( 'rand' === $instance['random'] ) {
+				echo 'selected="selected"';}
+			?>
+			>Random</option>
+			</select>
 		</p>
 
 		<!-- Number of Stories: Text Input -->
@@ -589,8 +545,100 @@ class Faculty_Books_Widget extends WP_Widget {
 			<?php } ?>
 			</select>
 		</p>
-		<?php }
+			<?php
+		}
+	}
+
+	/**
+	 * Front-end display of widget.
+	 *
+	 * @see WP_Widget::widget()
+	 *
+	 * @param array $args     Widget arguments.
+	 * @param array $instance Saved values from database.
+	 */
+	public function widget( $args, $instance ) {
+		/* Our variables from the widget settings. */
+		$title    = apply_filters( 'widget_title', $instance['title'] );
+		$random   = isset( $instance['random'] ) ? $instance['random'] : '';
+		$quantity = $instance['quantity'];
+		if ( taxonomy_exists( 'program' ) ) {
+			$program = $instance['program'];
+		}
+		echo $args['before_widget'];
+
+		/* Display the widget title if one was input (before and after defined by themes). */
+		if ( $title ) {
+			echo $args['before_title'] . $title . $args['after_title'];
+		}
+		if ( taxonomy_exists( 'program' ) ) {
+			$books_widget_query = new WP_Query(
+				array(
+					'post_type'      => 'faculty-books',
+					'program'        => $program,
+					'posts_per_page' => $quantity,
+					'orderby'        => $random,
+				)
+			);
+		} else {
+			$books_widget_query = new WP_Query(
+				array(
+					'post_type'      => 'faculty-books',
+					'posts_per_page' => $quantity,
+					'orderby'        => $random,
+				)
+			);
+		}
+		if ( $books_widget_query->have_posts() ) :
+			?>
+		<div class="book-listings">
+			<?php
+			while ( $books_widget_query->have_posts() ) :
+				$books_widget_query->the_post();
+				global $post;
+				?>
+				<article class="grid-x" aria-labelledby="book-<?php the_ID(); ?>">
+					<div class="cell">
+				<?php
+				$faculty_post_id  = get_post_meta( $post->ID, 'ecpt_pub_author', true );
+				$faculty_post_id2 = get_post_meta( $post->ID, 'ecpt_pub_author2', true );
+				?>
+					<?php
+					if ( has_post_thumbnail() ) {
+						the_post_thumbnail( 'directory', array( 'alt' => esc_html( get_the_title() ) ) );  }
+					?>
+					<h5>
+						<a href="<?php the_permalink(); ?>" id="book-<?php the_ID(); ?>"><?php the_title(); ?><span class="link"></span></a>
+					</h5>
+					<p>
+					<strong><?php echo esc_html( get_the_title( $faculty_post_id ) ); ?>,&nbsp;<?php echo esc_html( get_post_meta( $post->ID, 'ecpt_pub_role', true ) ); ?>
+						<?php
+						if ( get_post_meta( $post->ID, 'ecpt_author_cond', true ) == 'on' ) {
+							?>
+							<br>
+							<?php echo esc_html( get_the_title( $faculty_post_id2 ) ); ?> ,&nbsp;
+									<?php
+										echo esc_html( get_post_meta( $post->ID, 'ecpt_pub_role2', true ) );
+						}
+						?>
+					</strong></p>
+					</div>
+				</article>
+				<?php
+		endwhile;
+			?>
+		</div>
+			<?php
+		endif;
+		echo $args['after_widget'];
 	}
 }
+
+/** Register Widget */
+function ksas_load_faculty_books_widget() {
+	register_widget( 'Faculty_Books_Widget' );
+}
+
+add_action( 'widgets_init', 'ksas_load_faculty_books_widget' );
 
 ?>
