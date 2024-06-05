@@ -597,8 +597,7 @@ class Faculty_Books_Widget extends WP_Widget {
 				$books_widget_query->the_post();
 				global $post;
 				?>
-				<article class="grid-x" aria-labelledby="book-<?php the_ID(); ?>">
-					<div class="cell">
+				<article aria-labelledby="book-<?php the_ID(); ?>">
 				<?php
 				$faculty_post_id  = get_post_meta( $post->ID, 'ecpt_pub_author', true );
 				$faculty_post_id2 = get_post_meta( $post->ID, 'ecpt_pub_author2', true );
@@ -622,7 +621,6 @@ class Faculty_Books_Widget extends WP_Widget {
 						}
 						?>
 					</strong></p>
-					</div>
 				</article>
 				<?php
 		endwhile;
