@@ -463,6 +463,7 @@ class Faculty_Books_Widget extends WP_Widget {
 		$instance['title']    = isset( $new_instance['title'] ) ? wp_strip_all_tags( $new_instance['title'] ) : '';
 		$instance['random']   = isset( $new_instance['random'] ) ? wp_strip_all_tags( $new_instance['random'] ) : '';
 		$instance['quantity'] = isset( $new_instance['quantity'] ) ? wp_strip_all_tags( $new_instance['quantity'] ) : '';
+		$instance['link']     = isset( $new_instance['link'] ) ? wp_strip_all_tags( $new_instance['link'] ) : '';
 		if ( taxonomy_exists( 'program' ) ) {
 			$instance['program'] = wp_strip_all_tags( $new_instance['program'] );
 		}
@@ -518,6 +519,14 @@ class Faculty_Books_Widget extends WP_Widget {
 			<label for="<?php echo esc_html( $this->get_field_id( 'quantity' ) ); ?>"><?php esc_html_e( 'Number of stories to display:', 'ksas_books' ); ?></label>
 			<input id="<?php echo esc_html( $this->get_field_id( 'quantity' ) ); ?>" name="<?php echo esc_html( $this->get_field_name( 'quantity' ) ); ?>" value="<?php echo esc_html( $instance['quantity'] ); ?>" style="width:100%;" />
 		</p>
+
+		<!-- Widget Link: Archive Link -->
+		<p>
+			<label for="<?php echo esc_attr( $this->get_field_id( 'link' ) ); ?>"><?php _e( 'Link to Faculty Books Archive:', 'hybrid' ); ?></label>
+			<input id="<?php echo esc_attr( $this->get_field_id( 'link' ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'link' ) ); ?>" value="<?php echo $instance['link']; ?>" style="width:100%;" />
+		</p>
+
+		<!-- Widget Conditional: Program Taxonomy -->
 		<?php if ( taxonomy_exists( 'program' ) ) { ?>
 		<p>
 			<label for="<?php echo $this->get_field_id( 'program' ); ?>"><?php _e( 'Choose Program:', 'ksas_books' ); ?></label>
@@ -559,9 +568,10 @@ class Faculty_Books_Widget extends WP_Widget {
 	 */
 	public function widget( $args, $instance ) {
 		/* Our variables from the widget settings. */
-		$title    = apply_filters( 'widget_title', $instance['title'] );
-		$random   = isset( $instance['random'] ) ? $instance['random'] : '';
-		$quantity = $instance['quantity'];
+		$title        = apply_filters( 'widget_title', $instance['title'] );
+		$random       = isset( $instance['random'] ) ? $instance['random'] : '';
+		$quantity     = $instance['quantity'];
+		$archive_link = isset( $instance['link'] ) ? $instance['link'] : '';
 		if ( taxonomy_exists( 'program' ) ) {
 			$program = $instance['program'];
 		}
@@ -591,6 +601,11 @@ class Faculty_Books_Widget extends WP_Widget {
 		}
 		if ( $books_widget_query->have_posts() ) :
 			?>
+			<?php if ( ! empty( $archive_link ) ) : ?>
+			<div class="view-more-link news-section flex flex-row-reverse">
+				<a class="button" href="<?php echo ( esc_url( $archive_link ) ); ?>">View more <?php echo esc_html( $title ); ?>&nbsp;<span class="fa fa-chevron-circle-right" aria-hidden="true"></span></a>
+			</div>
+			<?php endif; ?>
 		<div class="book-listings">
 			<?php
 			while ( $books_widget_query->have_posts() ) :
