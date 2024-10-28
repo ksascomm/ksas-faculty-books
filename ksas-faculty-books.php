@@ -621,9 +621,9 @@ class Faculty_Books_Widget extends WP_Widget {
 					if ( has_post_thumbnail() ) {
 						the_post_thumbnail( 'full', array( 'alt' => esc_html( get_the_title() ) ) );  }
 					?>
-					<h5>
+					<h3>
 						<a href="<?php the_permalink(); ?>" id="book-<?php the_ID(); ?>"><?php the_title(); ?><span class="link"></span></a>
-					</h5>
+					</h3>
 					<p>
 					<strong><?php echo esc_html( get_the_title( $faculty_post_id ) ); ?>,&nbsp;<?php echo esc_html( get_post_meta( $post->ID, 'ecpt_pub_role', true ) ); ?>
 						<?php
