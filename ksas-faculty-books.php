@@ -205,3 +205,33 @@ function ksas_faculty_books_admin_styles() {
 	}
 }
 add_action( 'admin_head', 'ksas_faculty_books_admin_styles' );
+
+/**
+ * Exclude Graduate Students and Job Market Candidate roles from the Faculty Books Author dropdowns.
+ *
+ * @param array $args    The query arguments for the Post Object field.
+ * @return array Modified query arguments for the WP_Query.
+ */
+function ksas_exclude_grad_students_from_books( $args ) {
+	// Ensure tax_query is an array if not already set.
+	if ( ! isset( $args['tax_query'] ) ) {
+		$args['tax_query'] = array();
+	}
+	// Use a tax_query to exclude the 'graduate-student' slug.
+	$args['tax_query'] = array(
+		array(
+			'taxonomy' => 'role',
+			'field'    => 'slug',
+			'terms'    => array( 'graduate-student', 'job-market-candidate' ),
+			'operator' => 'NOT IN',
+		),
+	);
+
+	return $args;
+}
+
+// Apply to the Primary Author field.
+add_filter( 'acf/fields/post_object/query/key=field_ecpt_pub_author', 'ksas_exclude_grad_students_from_books', 10, 3 );
+
+// Apply to the Second Author field.
+add_filter( 'acf/fields/post_object/query/key=field_ecpt_pub_author2', 'ksas_exclude_grad_students_from_books', 10, 3 );
